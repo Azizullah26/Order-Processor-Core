@@ -91,6 +91,18 @@ Generated Zod schemas from the OpenAPI spec (e.g. `HealthCheckResponse`). Used b
 
 Generated React Query hooks and fetch client from the OpenAPI spec (e.g. `useHealthCheck`, `healthCheck`).
 
+### `artifacts/order-processor` (`@workspace/order-processor`)
+
+Standalone Node.js + TypeScript order processing system with SQLite.
+
+- Uses Node 22.5+ built-in `node:sqlite` (no native compilation needed)
+- `processOrder(db, input)` — main entry point with idempotency, validation, and atomic transactions
+- `src/db/` — database setup, schema DDL, and query helpers
+- `src/types/` — TypeScript interfaces (Order, OrderInput, etc.)
+- `src/validation/` — input validation and ValidationError class
+- `__tests__/processOrder.test.ts` — Jest test suite (8 tests covering success, duplicate messageId, validation, rollback)
+- Run tests: `pnpm --filter @workspace/order-processor test`
+
 ### `scripts` (`@workspace/scripts`)
 
 Utility scripts package. Each script is a `.ts` file in `src/` with a corresponding npm script in `package.json`. Run scripts via `pnpm --filter @workspace/scripts run <script>`. Scripts can import any workspace package (e.g., `@workspace/db`) by adding it as a dependency in `scripts/package.json`.
