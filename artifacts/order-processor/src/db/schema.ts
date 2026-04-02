@@ -14,6 +14,8 @@ export const CREATE_ORDERS_TABLE = `
     id               INTEGER PRIMARY KEY AUTOINCREMENT,
     message_id       TEXT    NOT NULL UNIQUE,
     customer_id      TEXT    NOT NULL,
+    user_name        TEXT    NOT NULL,
+    mobile_number    TEXT    NOT NULL,
     shipping_address TEXT    NOT NULL,
     total_amount     REAL    NOT NULL DEFAULT 0,
     status           TEXT    NOT NULL DEFAULT 'pending',

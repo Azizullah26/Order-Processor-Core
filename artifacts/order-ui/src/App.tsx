@@ -18,6 +18,8 @@ interface Order {
   id: number;
   messageId: string;
   customerId: string;
+  userName: string;
+  mobileNumber: string;
   shippingAddress: string;
   totalAmount: number;
   status: string;
@@ -129,7 +131,7 @@ function OrderCard({ order, highlight }: { order: Order; highlight?: boolean }) 
             {highlight && <Badge variant="success">New</Badge>}
           </div>
           <div className="text-xs text-muted-foreground mt-0.5 truncate">
-            {order.messageId} · {order.customerId}
+            {order.messageId} · Customer: {order.customerId} · User: {order.userName} ({order.mobileNumber})
           </div>
           <div className="text-xs text-muted-foreground truncate">{order.shippingAddress}</div>
         </div>
@@ -170,6 +172,8 @@ export default function App() {
   // --- Form state ---
   const [messageId, setMessageId] = useState(genMessageId);
   const [customerId, setCustomerId] = useState("cust-001");
+  const [userName, setUserName] = useState("John Doe");
+  const [mobileNumber, setMobileNumber] = useState("+1234567890");
   const [shippingAddress, setShippingAddress] = useState("123 Main St, Springfield, IL 62701");
   const [items, setItems] = useState<OrderItem[]>([
     { productId: "sku-001", productName: "Widget Pro", quantity: 2, unitPrice: 19.99 },
@@ -223,7 +227,7 @@ export default function App() {
     setSubmitting(true);
     setLastResult(null);
     try {
-      const result = await submitOrder({ messageId, customerId, shippingAddress, items });
+      const result = await submitOrder({ messageId, customerId, userName, mobileNumber, shippingAddress, items });
       setLastResult(result);
       await loadOrders();
       setActiveTab("orders");
@@ -319,11 +323,31 @@ export default function App() {
                   <p className="text-[11px] text-muted-foreground mt-1">Submit twice with the same ID to test idempotency</p>
                 </div>
 
-                <div>
+                <div className="col-span-2 sm:col-span-1">
                   <label className="block text-xs text-muted-foreground mb-1">Customer ID</label>
                   <input
                     value={customerId}
                     onChange={(e) => setCustomerId(e.target.value)}
+                    className="w-full rounded-lg border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                    required
+                  />
+                </div>
+
+                <div className="col-span-2 sm:col-span-1">
+                  <label className="block text-xs text-muted-foreground mb-1">User Name</label>
+                  <input
+                    value={userName}
+                    onChange={(e) => setUserName(e.target.value)}
+                    className="w-full rounded-lg border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                    required
+                  />
+                </div>
+
+                <div className="col-span-2 sm:col-span-1">
+                  <label className="block text-xs text-muted-foreground mb-1">Mobile Number</label>
+                  <input
+                    value={mobileNumber}
+                    onChange={(e) => setMobileNumber(e.target.value)}
                     className="w-full rounded-lg border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                     required
                   />
@@ -437,6 +461,8 @@ export default function App() {
                   setItems([]);
                   setShippingAddress("");
                   setCustomerId("cust-bad");
+                  setUserName("");
+                  setMobileNumber("");
                 }}
                 className="px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground bg-muted hover:bg-muted/80 rounded-xl transition-colors"
                 title="Set up a validation failure scenario"

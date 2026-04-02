@@ -20,9 +20,11 @@ function getDb(): DatabaseSync {
  * Submit a new order (or replay an existing one via messageId idempotency).
  */
 router.post("/orders", (req, res) => {
-  const { messageId, customerId, shippingAddress, items } = req.body as {
+  const { messageId, customerId, userName, mobileNumber, shippingAddress, items } = req.body as {
     messageId?: string;
     customerId?: string;
+    userName?: string;
+    mobileNumber?: string;
     shippingAddress?: string;
     items?: unknown[];
   };
@@ -35,11 +37,21 @@ router.post("/orders", (req, res) => {
     res.status(400).json({ error: "customerId is required" });
     return;
   }
+  if (!userName || typeof userName !== "string") {
+    res.status(400).json({ error: "userName is required" });
+    return;
+  }
+  if (!mobileNumber || typeof mobileNumber !== "string") {
+    res.status(400).json({ error: "mobileNumber is required" });
+    return;
+  }
 
   try {
     const result = processOrder(getDb(), {
       messageId,
       customerId,
+      userName,
+      mobileNumber,
       shippingAddress: shippingAddress ?? "",
       items: (items ?? []) as Array<{
         productId: string;
@@ -68,12 +80,14 @@ router.get("/orders", (_req, res) => {
   const database = getDb();
   const orders = database
     .prepare(
-      "SELECT id, message_id AS messageId, customer_id AS customerId, shipping_address AS shippingAddress, total_amount AS totalAmount, status, created_at AS createdAt FROM orders ORDER BY id DESC"
+      "SELECT id, message_id AS messageId, customer_id AS customerId, user_name AS userName, mobile_number AS mobileNumber, shipping_address AS shippingAddress, total_amount AS totalAmount, status, created_at AS createdAt FROM orders ORDER BY id DESC"
     )
     .all() as Array<{
       id: number;
       messageId: string;
       customerId: string;
+      userName: string;
+      mobileNumber: string;
       shippingAddress: string;
       totalAmount: number;
       status: string;

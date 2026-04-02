@@ -6,6 +6,8 @@
 export interface OrderInput {
   messageId: string;
   customerId: string;
+  userName: string;
+  mobileNumber: string;
   shippingAddress: string;
   items: OrderItemInput[];
 }
@@ -28,6 +30,8 @@ export interface Order {
   id: number;
   messageId: string;
   customerId: string;
+  userName: string;
+  mobileNumber: string;
   shippingAddress: string;
   totalAmount: number;
   status: string;

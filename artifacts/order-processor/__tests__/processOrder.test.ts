@@ -18,6 +18,8 @@ function validInput(overrides: Partial<OrderInput> = {}): OrderInput {
   return {
     messageId: "msg-001",
     customerId: "cust-abc",
+    userName: "John Doe",
+    mobileNumber: "+1234567890",
     shippingAddress: "123 Main Street, Springfield, IL 62701",
     items: [
       {
@@ -34,7 +36,7 @@ function validInput(overrides: Partial<OrderInput> = {}): OrderInput {
       },
     ],
     ...overrides,
-  };
+  } as OrderInput;
 }
 
 // ---------------------------------------------------------------------------
@@ -137,6 +139,35 @@ describe("processOrder", () => {
       expect(() =>
         processOrder(db, validInput({ shippingAddress: "   " }))
       ).toThrow(ValidationError);
+      db.close();
+    });
+
+    it("rejects an order with empty userName or mobileNumber", () => {
+      const db = makeDb();
+      expect(() =>
+        processOrder(db, validInput({ userName: "" }))
+      ).toThrow(ValidationError);
+      expect(() =>
+        processOrder(db, validInput({ mobileNumber: "" }))
+      ).toThrow(ValidationError);
+      db.close();
+    });
+
+    it("rejects duplicate product order from the same user", () => {
+      const db = makeDb();
+      const input = validInput();
+      processOrder(db, input);
+
+      // Same user, different messageId, but same item
+      const duplicateItemInput = validInput({ messageId: "msg-002" });
+      expect(() => processOrder(db, duplicateItemInput)).toThrow(ValidationError);
+      expect(() => processOrder(db, duplicateItemInput)).toThrow(/You already have an order for "Widget Pro"/);
+      
+      // Different user, same item (should pass)
+      const diffUserInput = validInput({ messageId: "msg-003", userName: "Jane Doe" });
+      const diffResult = processOrder(db, diffUserInput);
+      expect(diffResult.isDuplicate).toBe(false);
+
       db.close();
     });
 
@@ -246,6 +277,8 @@ describe("processOrder", () => {
         insertOrderWithItems(db, {
           messageId: "rollback-test",
           customerId: "c1",
+          userName: "Test",
+          mobileNumber: "123",
           shippingAddress: "123 Street",
           items: badInput.items,
         })

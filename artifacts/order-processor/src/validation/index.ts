@@ -23,6 +23,14 @@ export class ValidationError extends Error {
  * Throws ValidationError on the first failed constraint.
  */
 export function validateOrderInput(input: OrderInput): void {
+  if (!input.userName || input.userName.trim().length === 0) {
+    throw new ValidationError("userName must not be empty");
+  }
+
+  if (!input.mobileNumber || input.mobileNumber.trim().length === 0) {
+    throw new ValidationError("mobileNumber must not be empty");
+  }
+
   if (!input.shippingAddress || input.shippingAddress.trim().length === 0) {
     throw new ValidationError("shippingAddress must not be empty");
   }

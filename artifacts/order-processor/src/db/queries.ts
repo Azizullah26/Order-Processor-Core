@@ -10,7 +10,7 @@ export function findOrderByMessageId(
   messageId: string
 ): Order | undefined {
   const stmt = db.prepare(
-    "SELECT id, message_id AS messageId, customer_id AS customerId, shipping_address AS shippingAddress, total_amount AS totalAmount, status, created_at AS createdAt FROM orders WHERE message_id = ?"
+    "SELECT id, message_id AS messageId, customer_id AS customerId, user_name AS userName, mobile_number AS mobileNumber, shipping_address AS shippingAddress, total_amount AS totalAmount, status, created_at AS createdAt FROM orders WHERE message_id = ?"
   );
   const row = stmt.get(messageId) as unknown as Order | undefined;
   return row;
@@ -41,6 +41,8 @@ export function insertOrderWithItems(
   params: {
     messageId: string;
     customerId: string;
+    userName: string;
+    mobileNumber: string;
     shippingAddress: string;
     items: OrderItemInput[];
   }
@@ -58,11 +60,13 @@ export function insertOrderWithItems(
   try {
     // --- Insert order header ---
     const insertOrder = db.prepare(
-      "INSERT INTO orders (message_id, customer_id, shipping_address, total_amount) VALUES (?, ?, ?, ?)"
+      "INSERT INTO orders (message_id, customer_id, user_name, mobile_number, shipping_address, total_amount) VALUES (?, ?, ?, ?, ?, ?)"
     );
     insertOrder.run(
       params.messageId,
       params.customerId,
+      params.userName,
+      params.mobileNumber,
       params.shippingAddress,
       totalAmount
     );
@@ -101,4 +105,24 @@ export function insertOrderWithItems(
     db.exec("ROLLBACK;");
     throw err;
   }
+}
+
+/**
+ * Checks if a user (by name and mobile) has already ordered a specific product.
+ */
+export function hasUserOrderedProduct(
+  db: DatabaseSync,
+  userName: string,
+  mobileNumber: string,
+  productId: string
+): boolean {
+  const stmt = db.prepare(`
+    SELECT 1 
+    FROM orders o
+    JOIN order_items oi ON o.id = oi.order_id
+    WHERE o.user_name = ? AND o.mobile_number = ? AND oi.product_id = ?
+    LIMIT 1
+  `);
+  const row = stmt.get(userName, mobileNumber, productId);
+  return !!row;
 }

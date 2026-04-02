@@ -16,9 +16,25 @@ export function openDatabase(filePath: string = ":memory:"): DatabaseSync {
   // Enforce foreign-key constraints (SQLite disables them by default)
   db.exec("PRAGMA foreign_keys = ON;");
 
-  // Initialise schema
+  // Initialise schema (no-op if tables already exist)
   db.exec(CREATE_ORDERS_TABLE);
   db.exec(CREATE_ORDER_ITEMS_TABLE);
+
+  // -------------------------------------------------------------------------
+  // Schema migrations — add columns introduced after the initial schema.
+  // ALTER TABLE ADD COLUMN is idempotent when wrapped in try/catch because
+  // SQLite throws if the column already exists (no IF NOT EXISTS support).
+  // -------------------------------------------------------------------------
+  const existingColumns = (
+    db.prepare("PRAGMA table_info(orders)").all() as Array<{ name: string }>
+  ).map((c) => c.name);
+
+  if (!existingColumns.includes("user_name")) {
+    db.exec("ALTER TABLE orders ADD COLUMN user_name TEXT NOT NULL DEFAULT '';");
+  }
+  if (!existingColumns.includes("mobile_number")) {
+    db.exec("ALTER TABLE orders ADD COLUMN mobile_number TEXT NOT NULL DEFAULT '';");
+  }
 
   return db;
 }
