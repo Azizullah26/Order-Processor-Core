@@ -36,7 +36,7 @@ function validInput(overrides: Partial<OrderInput> = {}): OrderInput {
       },
     ],
     ...overrides,
-  } as OrderInput;
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -131,17 +131,6 @@ describe("processOrder", () => {
   // 3. Validation failures
   // -------------------------------------------------------------------------
   describe("validation failures", () => {
-    it("rejects an empty shippingAddress", () => {
-      const db = makeDb();
-      expect(() =>
-        processOrder(db, validInput({ shippingAddress: "" }))
-      ).toThrow(ValidationError);
-      expect(() =>
-        processOrder(db, validInput({ shippingAddress: "   " }))
-      ).toThrow(ValidationError);
-      db.close();
-    });
-
     it("rejects an order with empty userName or mobileNumber", () => {
       const db = makeDb();
       expect(() =>
@@ -168,6 +157,17 @@ describe("processOrder", () => {
       const diffResult = processOrder(db, diffUserInput);
       expect(diffResult.isDuplicate).toBe(false);
 
+      db.close();
+    });
+
+    it("rejects an empty shippingAddress", () => {
+      const db = makeDb();
+      expect(() =>
+        processOrder(db, validInput({ shippingAddress: "" }))
+      ).toThrow(ValidationError);
+      expect(() =>
+        processOrder(db, validInput({ shippingAddress: "   " }))
+      ).toThrow(ValidationError);
       db.close();
     });
 

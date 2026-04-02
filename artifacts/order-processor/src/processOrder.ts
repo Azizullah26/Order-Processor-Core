@@ -6,8 +6,7 @@ import {
   insertOrderWithItems,
 } from "./db/queries";
 import type { OrderInput, ProcessOrderResult } from "./types";
-import { validateOrderInput } from "./validation";
-import { ValidationError } from "./validation";
+import { validateOrderInput, ValidationError } from "./validation";
 
 /**
  * processOrder — the main entry point for order processing.
@@ -17,9 +16,7 @@ import { ValidationError } from "./validation";
  *     on any violation — no DB work is performed.
  *  2. Check for an existing order with the same messageId (idempotency).
  *     If one exists, return it immediately without writing to the database.
- *  3. Check if the user (by userName + mobileNumber) has already ordered any
- *     of the same products. Throws ValidationError if a match is found.
- *  4. Insert the order and all its items in a single atomic SQLite transaction.
+ *  3. Insert the order and all its items in a single atomic SQLite transaction.
  *     If any statement fails the transaction is rolled back, leaving the DB
  *     in the pre-call state.
  *
@@ -41,9 +38,13 @@ export function processOrder(
     return { order: existingOrder, items, isDuplicate: true };
   }
 
-  // Step 3: per-user duplicate item check
+  // Step 3: per-user duplicate item check.
+  // Before inserting, check if the same user (name + mobile) already has an
+  // order for any of the product IDs in this request.
   for (const item of input.items) {
-    if (hasUserOrderedProduct(db, input.userName, input.mobileNumber, item.productId)) {
+    if (
+      hasUserOrderedProduct(db, input.userName, input.mobileNumber, item.productId)
+    ) {
       throw new ValidationError(
         `You already have an order for "${item.productName}". Please choose a different item.`
       );

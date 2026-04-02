@@ -22,8 +22,6 @@ export function openDatabase(filePath: string = ":memory:"): DatabaseSync {
 
   // -------------------------------------------------------------------------
   // Schema migrations — add columns introduced after the initial schema.
-  // ALTER TABLE ADD COLUMN is idempotent when wrapped in try/catch because
-  // SQLite throws if the column already exists (no IF NOT EXISTS support).
   // -------------------------------------------------------------------------
   const existingColumns = (
     db.prepare("PRAGMA table_info(orders)").all() as Array<{ name: string }>

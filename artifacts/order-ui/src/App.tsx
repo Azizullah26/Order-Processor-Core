@@ -116,9 +116,8 @@ function OrderCard({ order, highlight }: { order: Order; highlight?: boolean }) 
   const [expanded, setExpanded] = useState(highlight ?? false);
   return (
     <div
-      className={`rounded-xl border bg-card shadow-sm transition-all ${
-        highlight ? "border-primary ring-2 ring-primary/20" : "border-border"
-      }`}
+      className={`rounded-xl border bg-card shadow-sm transition-all ${highlight ? "border-primary ring-2 ring-primary/20" : "border-border"
+        }`}
     >
       <button
         className="w-full text-left p-4 flex items-start justify-between gap-3"
@@ -258,17 +257,15 @@ export default function App() {
           <div className="flex gap-1">
             <button
               onClick={() => setActiveTab("form")}
-              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
-                activeTab === "form" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted"
-              }`}
+              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${activeTab === "form" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                }`}
             >
               Submit Order
             </button>
             <button
               onClick={() => { setActiveTab("orders"); loadOrders(); }}
-              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
-                activeTab === "orders" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted"
-              }`}
+              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${activeTab === "orders" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                }`}
             >
               Orders {orders.length > 0 && <span className="ml-1 text-[10px] opacity-70">({orders.length})</span>}
             </button>
@@ -476,6 +473,7 @@ export default function App() {
               <p className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wide">Test scenarios</p>
               <ul className="space-y-1.5 text-xs text-muted-foreground">
                 <li><strong className="text-foreground">Idempotency:</strong> Submit an order, then submit again with the same Message ID — the second call returns the existing order.</li>
+                <li><strong className="text-foreground">Duplicate Check:</strong> Order "Widget Pro", then try to order it again with the same Name and Mobile — it will block you!</li>
                 <li><strong className="text-foreground">Validation — empty address:</strong> Clear the shipping address and submit.</li>
                 <li><strong className="text-foreground">Validation — no items:</strong> Remove all items and submit.</li>
                 <li><strong className="text-foreground">Validation — bad quantity:</strong> Add an item with quantity 0 or negative.</li>
